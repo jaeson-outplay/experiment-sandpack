@@ -1,5 +1,6 @@
-from smolagents import Tool
-
+from smolagents import CodeAgent, DuckDuckGoSearchTool, Tool, HfApiModel
+import os
+from dotenv import load_dotenv
 class FileReaderTool(Tool):
     name = "file_reader_tool"
     description = """
@@ -20,7 +21,7 @@ class FileReaderTool(Tool):
 class FileWriteTool(Tool):
     name = "file_write_tool"
     description = """
-    This tool will be used by the LLM Agent to overwrite files if needed for task. Use this with absolute caution.
+    This tool will be used by the LLM Agent to overwrite files if needed for task.
     """
     inputs = {
         "file_location": {
@@ -56,10 +57,6 @@ class FileModifyTool(Tool):
     output_type = "string"
 
     def forward(self,file_location, prompt) -> str:
-        from smolagents import CodeAgent, DuckDuckGoSearchTool, Tool, HfApiModel
-        import os
-        from dotenv import load_dotenv
-
         load_dotenv() 
 
         HF_TOKEN = os.getenv("HF_TOKEN")
@@ -70,20 +67,24 @@ class FileModifyTool(Tool):
         model = HfApiModel("Qwen/Qwen2.5-Coder-32B-Instruct", token=HF_TOKEN)
         coderAgent = CodeAgent(tools=[file_reader_tool, file_write_tool], model=model)
 
-        modified_code = coderAgent.run(f"Modify the following code:\n{file_reader_tool}\n\nInstruction:\n{prompt}")
+        file_content = file_reader_tool.forward(file_location)
 
+        if not file_content:
+            return "Error: File could not be read."
+
+        modified_code = coderAgent.run(f"Modify this code based on the instruction:\n{file_content}\n\n{prompt}")
         if "ERROR" in modified_code:
             return "Modification failed, please refine your request."
-        
-        if modified_code:
-            return "Code updated successfully!"
+        write_result = file_write_tool.forward(file_location, modified_code)
+        return "Code updated successfully!" if write_result else "Failed to update code."
+
         
 
 
 class FileReplaceTool(Tool):
     name = "file_replace_tool"
     description ="""
-    This tool will be used to replace the file in a given location with the provided new file location.
+    This tool will be used to replace the file in a given location with the provided new file location. This is not used to update files.
     """
     inputs = {
         "target_file_location": {

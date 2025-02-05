@@ -56,6 +56,9 @@ jspm_packages/
 .rts2_cache_es/
 .rts2_cache_umd/
 
+# Python Cache
+*.pyc
+
 # Optional REPL history
 .node_repl_history
 
