@@ -36,20 +36,18 @@ get_image_dimensions_tool= GetImageDimensionsTool()
 file_modify_tool = FileModifyTool()
 
 #Identify purpose of prompt
-# promptCleanerAgent = CodeAgent(tools=[process_identifier_tool], model=model)
-# instructions = promptCleanerAgent.run(f'determine the purpose of the following string "{userPrompt}" if it is one of the following: [asset_change, script_update]')
+promptCleanerAgent = CodeAgent(tools=[], model=model)
+instructions = promptCleanerAgent.run(f'determine the purpose of the following string "{userPrompt}" if it is one of the following: [asset_change, script_update]')
 # print("instructions: " + instructions)
 
 appDescription = """
-    This is a 2d platformer game that uses typescript and sandpack. The sandpack-examples.tsx file in the components folder contains the game logic and scripts 
-    can be found. To modify platforms, 
-    1) use the find files tool to get a list of files containing tsx, and find the sandpack-examples.tsx file and copy its path. 
-    2) look inside sandpack examples for the line containing platforms.map with a <rect> tag and modify the fill to change platform color
-    3) update the file and replace the code for platform with the modified one
+    This is a 2d platformer game where the player controls a ball that bounces off platforms falling down. This app
+    uses typescript and sandpack. The folder components/sandpack-examples.tsx file contains the game logic and scripts.
 """
-# contextPrompt = f'using process_identifier_tool look for the appropriate instructions for "{instructions}" and apply it to the statement after this'
-agent = CodeAgent(tools=[find_files_tool, image_generation_tool, file_modify_tool, get_image_dimensions_tool, file_replace_tool], model=model)
-response = agent.run(f"{appDescription} {userPrompt} ")
+contextPrompt = f'using process_identifier_tool look for the appropriate instructions for "{instructions}" and apply it to the user prompt after this'
+
+agent = CodeAgent(tools=[find_files_tool, process_identifier_tool, image_generation_tool, file_modify_tool, get_image_dimensions_tool, file_replace_tool], model=model)
+response = agent.run(f"{appDescription} {contextPrompt} {userPrompt} ")
 # agent = CodeAgent(tools=[DuckDuckGoSearchTool()], model=HfApiModel())
 # Step 1: Prompt reception
 print(f"Response made: {response}")

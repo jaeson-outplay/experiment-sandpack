@@ -83,17 +83,21 @@ export const SandpackExamples = () => {
                   <h1>Doodle Jump</h1>
                   <img width="100" src="/public/logo.svg" />
                   <svg width="400" height="600" className="mx-auto mt-10 border border-black bg-blue-300">
+                    {/* Background Asset*/}
                     {gameOver && (
                       <rect width="400" height="600" fill="white" opacity="0.8" />
                     )}
+                      {/* Game Over Asset*/}
                     {gameOver && (
                       <text x="200" y="300" textAnchor="middle" fontSize="24" fontWeight="bold" fill="black">
                         Game Over
                       </text>
                     )}
+                    {/* Platform Asset */}
                     {platforms.map((plat, i) => (
                       <rect key={i} x={plat.x} y={plat.y} width={PLATFORM_WIDTH} height="10" fill="green" />
                     ))}
+                    {/* Player Asset*/}
                     <circle cx={player.x + 10} cy={player.y + 10} r="10" fill="red" />
                   </svg>
                 </>
