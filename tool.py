@@ -65,19 +65,18 @@ class FileModifyTool(Tool):
         file_write_tool = FileWriteTool()
 
         model = HfApiModel("Qwen/Qwen2.5-Coder-32B-Instruct", token=HF_TOKEN)
-        coderAgent = CodeAgent(tools=[file_reader_tool, file_write_tool], model=model)
+        coderAgent = CodeAgent(tools=[], model=model)
 
         file_content = file_reader_tool.forward(file_location)
 
         if not file_content:
             return "Error: File could not be read."
 
-        modified_code = coderAgent.run(f"Modify this code based on the instruction:\n{file_content}\n\n{prompt}")
+        modified_code = coderAgent.run(f'Based on the prompt "{prompt}" \n Modify the following code:\n{file_content}\n')
         if "ERROR" in modified_code:
             return "Modification failed, please refine your request."
         write_result = file_write_tool.forward(file_location, modified_code)
-        return "Code updated successfully!" if write_result else "Failed to update code."
-
+        return
         
 
 
@@ -147,15 +146,16 @@ class ProcessFlowIdentifierTool(Tool):
         match prompt_objective:
             case "asset_change":
                 instructions = """
-                1. Find the webp file assosciated with prompt.
-                2. Copy original asset's dimensions using the get_image_dimensions_tool(file_location).
-                3. Generate the image using the image_generation_tool(prompt,width,height) and add the width and height as parameters that follows the original file (example: image_generation_tool(prompt"", width=32px, height=32px)).
-                4. Download the image and replace the original using the FileUpdateTool tool.
+                    1) use the find files tool to get a list of files containing tsx, and find the sandpack-examples.tsx file and copy its path. 
+                    2) Use the file_modify_tool to analyze and update the file.
+                    3) End process after sucessfully modifying the file
                 """
                 return instructions
             case "script_change":
                 instructions = """
-                none yet
+                    1) use the find files tool to get a list of files containing tsx, and find the sandpack-examples.tsx file and copy its path. 
+                    2) Use the file_modify_tool to analyze and update the file.
+                    3) End process after sucessfully modifying the file
                 """
                 return instructions
             case _:
